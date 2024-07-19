@@ -3,8 +3,23 @@ from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from . import models, schemas
 from .database import SessionLocal, engine
+from flask import Flask, request, jsonify
+from flask_jwt_extended import JWTManager, create_access_token
 
 models.Base.metadata.create_all(bind=engine)
+app = Flask(__name__)
+jwt = JWTManager(app)
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    # Verify credentials (implementation omitted)
+    if is_valid_credentials(username, password):
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token), 200
+    else:
+        return jsonify({"msg": "Bad username or password"}), 401
 
 app = FastAPI()
 
